@@ -5,8 +5,8 @@ import (
 	"github.com/marczahn/simple-go-di/pkg/di"
 )
 
-var sqlRepo = di.NewSingleton[*SQLRepo]()
-var sqlConn = di.NewSingleton[*sql.DB]()
+var sqlRepo = di.NewInstance[*SQLRepo]()
+var sqlConn = di.NewInstance[*sql.DB]()
 
 func SQLConn() *sql.DB {
 	return sqlConn.GetOrSet(
@@ -35,8 +35,11 @@ type SQLRepo struct {
 	conn *sql.DB
 }
 
-func (s *SQLRepo) Select() {
-	s.conn.Query("...")
+func (s *SQLRepo) Select() (any, error) {
+	rsl, err := s.conn.Query("...")
+	if err != nil {
+		return nil, err
+	}
 
-	// return result
+	return rsl, nil
 }

@@ -6,18 +6,18 @@ import (
 )
 
 func TestGetOrSetTypes(t *testing.T) {
-	subjectI := di.NewSingleton[int]()
+	subjectI := di.NewInstance[int]()
 	number := subjectI.GetOrSet(func() int { return 1 }, false)
 	if number != 1 {
 		t.Errorf("number failed - want 1, got %v", number)
 	}
-	subjectS := di.NewSingleton[string]()
+	subjectS := di.NewInstance[string]()
 	str := subjectS.GetOrSet(func() string { return "string" }, false)
 	if str != "string" {
 		t.Errorf("string failed - want string, got %v", str)
 	}
 
-	subjectSl := di.NewSingleton[[3]int]()
+	subjectSl := di.NewInstance[[3]int]()
 	aIn := [3]int{1, 2, 3}
 	a := subjectSl.GetOrSet(func() [3]int { return aIn }, false)
 	if a != aIn {
@@ -27,7 +27,7 @@ func TestGetOrSetTypes(t *testing.T) {
 	type T struct {
 		field string
 	}
-	subjectStruct := di.NewSingleton[T]()
+	subjectStruct := di.NewInstance[T]()
 	sIn := T{field: "value"}
 	s := subjectStruct.GetOrSet(func() T { return sIn }, false)
 	if s != sIn {
@@ -35,7 +35,7 @@ func TestGetOrSetTypes(t *testing.T) {
 	}
 
 	ptrIn := &T{field: "value"}
-	subjectPtr := di.NewSingleton[*T]()
+	subjectPtr := di.NewInstance[*T]()
 	ptr := subjectPtr.GetOrSet(func() *T { return ptrIn }, false)
 	if *ptr != *ptrIn {
 		t.Errorf("pointer failed - want %v, got %v", ptrIn, ptr)
@@ -43,7 +43,7 @@ func TestGetOrSetTypes(t *testing.T) {
 }
 
 func TestGetOrSetOverwrite(t *testing.T) {
-	subject := di.NewSingleton[int]()
+	subject := di.NewInstance[int]()
 	_ = subject.GetOrSet(func() int { return 1 }, false)
 	old := subject.GetOrSet(func() int { return 2 }, false)
 	if old != 1 {
@@ -64,13 +64,13 @@ func TestGetOrSetNestedDependency(t *testing.T) {
 		dep nestedDep
 	}
 	getNestedDep := func() nestedDep {
-		subject := di.NewSingleton[nestedDep]()
+		subject := di.NewInstance[nestedDep]()
 		return subject.GetOrSet(
 			func() nestedDep { return nestedDep{someValue: testValue} },
 			true,
 		)
 	}
-	subjectOuter := di.NewSingleton[outerDep]()
+	subjectOuter := di.NewInstance[outerDep]()
 	dep := subjectOuter.GetOrSet(func() outerDep { return outerDep{dep: getNestedDep()} }, true)
 
 	if dep.dep.someValue != testValue {
@@ -79,7 +79,7 @@ func TestGetOrSetNestedDependency(t *testing.T) {
 }
 
 func TestGetOrSetConcurrency(t *testing.T) {
-	subject := di.NewSingleton[int]()
+	subject := di.NewInstance[int]()
 	for i := 0; i < 100; i++ {
 		go func(i int) {
 			actual := subject.GetOrSet(func() int { return i }, true)

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var httpSingleton = di.NewSingleton[*http.Client]()
+var httpSingleton = di.NewInstance[*http.Client]()
 
 func HttpClient() *http.Client {
 	return httpSingleton.GetOrSet(

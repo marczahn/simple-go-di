@@ -1,8 +1,9 @@
 package di_test
 
 import (
-	"github.com/marczahn/simple-go-di/pkg/di"
 	"testing"
+
+	"github.com/marczahn/simple-go-di/pkg/di"
 )
 
 func TestGetOrSetTypes(t *testing.T) {
@@ -43,15 +44,18 @@ func TestGetOrSetTypes(t *testing.T) {
 }
 
 func TestGetOrSetOverwrite(t *testing.T) {
-	subject := di.NewInstance[int]()
-	_ = subject.GetOrSet(func() int { return 1 }, false)
-	old := subject.GetOrSet(func() int { return 2 }, false)
-	if old != 1 {
-		t.Errorf("number overwrite: false failed - want 1, got %v", old)
+	type T struct{ s string }
+	subject := di.NewInstance[*T]()
+
+	first := subject.GetOrSet(func() *T { return &T{s: "abc"} }, false)
+	second := subject.GetOrSet(func() *T { return &T{s: "def"} }, false)
+
+	if first != second {
+		t.Errorf("overwrite false failed: new instance created")
 	}
-	n := subject.GetOrSet(func() int { return 2 }, true)
-	if n != 2 {
-		t.Errorf("overwrite: true failed - want 2, got %v", n)
+	n := subject.GetOrSet(func() *T { return &T{} }, true)
+	if first == n {
+		t.Errorf("overwrite: true failed: new instance not created")
 	}
 }
 
